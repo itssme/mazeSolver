@@ -1,3 +1,4 @@
+import os
 import time
 
 
@@ -13,7 +14,7 @@ class Pos:
         if isinstance(o, Pos):
             return o.x == self.x and o.y == self.y
         else:
-            return super(Pos, self).__eq__()
+            raise NotImplementedError
 
 
 class Node:
@@ -30,11 +31,36 @@ class Node:
     def __str__(self):
         return "Node(" + str(self.pos) + ", cost=" + str(self.cost) + ")"
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, Node):
+            return o.pos == self.pos
+        else:
+            raise NotImplementedError
+
     def __lt__(self, other: object) -> bool:
         if isinstance(other, Node):
             return self.cost < other.cost
         else:
             raise NotImplementedError
+
+    def get_next(self, maze):
+        if self.up is None and maze[self.pos.x - 1][self.pos.y] != '#':
+            self.up = Node(Pos(self.pos.x - 1, self.pos.y), pred=self, cost=self.cost + 1)
+            return self.up
+
+        if self.right is None and maze[self.pos.x][self.pos.y+1] != '#':
+            self.right = Node(Pos(self.pos.x, self.pos.y + 1), pred=self, cost=self.cost + 1)
+            return self.right
+
+        if self.down is None and maze[self.pos.x + 1][self.pos.y] != '#':
+            self.down = Node(Pos(self.pos.x + 1, self.pos.y), pred=self, cost=self.cost + 1)
+            return self.down
+
+        if self.left is None and maze[self.pos.x][self.pos.y - 1] != '#':
+            self.left = Node(Pos(self.pos.x, self.pos.y - 1), pred=self, cost=self.cost + 1)
+            return self.left
+
+        return None
 
 
 def main():
@@ -63,12 +89,68 @@ def main():
         raise Exception("Could not find start position")
 
     print("Starting at: " + str(start_pos))
-    current_node = Node(start_pos)
+    next_node = Node(start_pos)
+    sortedList = [next_node]
 
-    sortedList = []
+    def printList():
+        str_list = "["
+        for node in sortedList:
+            str_list += str(node) + ","
+        str_list = str_list[:-1] + "]"
+        print(str_list)
 
-    while maze[current_node.pos.x][current_node.pos.y] != "E":
-        pass
+    def printMaze():
+        for line in maze:
+            line_str = ""
+            for char in line:
+                line_str += char
+            print(line_str)
+
+    def insert_node(new_node: Node):
+        i = 0
+        while i < len(sortedList):
+            if new_node < sortedList[i]:
+                sortedList.insert(i, new_node)
+                i = len(sortedList)
+            i += 1
+
+        if i == len(sortedList):
+            sortedList.append(new_node)
+
+    start = time.time()
+    draw = 0
+    while maze[next_node.pos.x][next_node.pos.y] != 'E':
+        next_node = None
+
+        i = 0
+        while next_node is None:
+            next_node = sortedList[i].get_next(maze)
+            i += 1
+
+        #printList()
+
+        if next_node in sortedList:
+            old_i = sortedList.index(next_node)
+            if next_node.cost < sortedList[old_i].cost:
+                sortedList.remove(next_node)
+                insert_node(next_node)
+        else:
+            insert_node(next_node)
+
+        if maze[next_node.pos.x][next_node.pos.y] != 'E':
+            maze[next_node.pos.x][next_node.pos.y] = '.'
+            draw += 1
+            if draw % 100 == 0:
+                os.system("clear")
+                printMaze()
+
+    print("solved maze in " + str(time.time() - start) + " seconds")
+
+    while next_node.pos != start_pos:
+        maze[next_node.pos.x][next_node.pos.y] = "O"
+        next_node = next_node.pred
+
+    printMaze()
 
 
 if __name__ == '__main__':
