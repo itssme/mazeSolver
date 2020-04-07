@@ -2,6 +2,35 @@ import os
 import time
 
 
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+    BLACKBG = '\33[40m'
+    REDBG = '\33[41m'
+    GREENBG = '\33[42m'
+    YELLOWBG = '\33[43m'
+    BLUEBG = '\33[44m'
+    VIOLETBG = '\33[45m'
+    BEIGEBG = '\33[46m'
+    WHITEBG = '\33[47m'
+
+    GREYBG = '\33[100m'
+    REDBG2 = '\33[101m'
+    GREENBG2 = '\33[102m'
+    YELLOWBG2 = '\33[103m'
+    BLUEBG2 = '\33[104m'
+    VIOLETBG2 = '\33[105m'
+    BEIGEBG2 = '\33[106m'
+    WHITEBG2 = '\33[107m'
+
+
 class Pos:
     def __init__(self, x, y):
         self.x = x
@@ -64,7 +93,7 @@ class Node:
 
 
 def main():
-    reader = open("maze2.txt", "r")
+    reader = open("maze3.txt", "r")
 
     maze_read = reader.readlines()
     maze = []
@@ -103,7 +132,14 @@ def main():
         for line in maze:
             line_str = ""
             for char in line:
-                line_str += char
+                if char == '#':
+                    line_str += Colors.REDBG + ' ' + Colors.ENDC
+                elif char == 'S':
+                    line_str += Colors.WHITEBG + ' ' + Colors.ENDC
+                elif char == 'E':
+                    line_str += Colors.WHITEBG + ' ' + Colors.ENDC
+                else:
+                    line_str += char
             print(line_str)
 
     def insert_node(new_node: Node):
@@ -137,8 +173,8 @@ def main():
         else:
             insert_node(next_node)
 
-        if maze[next_node.pos.x][next_node.pos.y] != 'E':
-            maze[next_node.pos.x][next_node.pos.y] = '.'
+        if maze[next_node.pos.x][next_node.pos.y] != 'E' and maze[next_node.pos.x][next_node.pos.y] != 'S':
+            maze[next_node.pos.x][next_node.pos.y] = Colors.BLUEBG + ' ' + Colors.ENDC
             draw += 1
             if draw % 100 == 0:
                 os.system("clear")
@@ -147,10 +183,11 @@ def main():
     print("solved maze in " + str(time.time() - start) + " seconds")
 
     while next_node.pos != start_pos:
-        maze[next_node.pos.x][next_node.pos.y] = "O"
+        maze[next_node.pos.x][next_node.pos.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
-
-    printMaze()
+        os.system("clear")
+        printMaze()
+        time.sleep(0.2)
 
 
 if __name__ == '__main__':
