@@ -32,57 +32,45 @@ class Colors:
     WHITEBG2 = '\33[107m'
 
 
-class Pos:
-    def __init__(self, x, y):
+class Node:
+    def __init__(self, x, y, maze, pred=None, cost=0):
         self.x = x
         self.y = y
-
-    def __str__(self):
-        return "Pos(" + str(self.x) + ", " + str(self.y) + ")"
-
-    def __eq__(self, o: object) -> bool:
-        return o.x == self.x and o.y == self.y
-
-
-class Node:
-    def __init__(self, pos, pred=None, cost=0):
-        self.pos = pos
-        self.left = False
-        self.up = False
-        self.right = False
-        self.down = False
         self.pred = pred
         self.cost = cost
+        self.costN = cost + 1
+
+        self.conns = []
+
+        if maze[self.x - 1][self.y] != '#':
+            self.conns.append((self.x - 1, self.y))
+        if maze[self.x][self.y+1] != '#':
+            self.conns.append((self.x, self.y + 1))
+        if maze[self.x + 1][self.y] != '#':
+            self.conns.append((self.x + 1, self.y))
+        if maze[self.x][self.y - 1] != '#':
+            self.conns.append((self.x, self.y - 1))
+
+        self.len = len(self.conns)
 
     def __str__(self):
-        #return "Node(" + str(self.pos) + ", cost=" + str(self.cost) + ")"
+        #return "Node(" + str(self) + ", cost=" + str(self.cost) + ")"
         return str(self.cost)
 
-    def __eq__(self, o: object) -> bool:
-        return o.pos == self.pos
+    def __eq__(self, o):
+        return o.x == self.x and o.y == self.y
 
-    def __lt__(self, other: object) -> bool:
+    def __lt__(self, other):
         return self.cost < other.cost
 
-    def __le__(self, other: object) -> bool:
+    def __le__(self, other):
         return self.cost <= other.cost
 
     def get_next(self, maze):
-        if not self.up and maze[self.pos.x - 1][self.pos.y] != '#':
-            self.up = True
-            return Node(Pos(self.pos.x - 1, self.pos.y), pred=self, cost=self.cost + 1)
-
-        elif not self.right and maze[self.pos.x][self.pos.y+1] != '#':
-            self.right = True
-            return Node(Pos(self.pos.x, self.pos.y + 1), pred=self, cost=self.cost + 1)
-
-        elif not self.down and maze[self.pos.x + 1][self.pos.y] != '#':
-            self.down = True
-            return Node(Pos(self.pos.x + 1, self.pos.y), pred=self, cost=self.cost + 1)
-
-        elif not self.left and maze[self.pos.x][self.pos.y - 1] != '#':
-            self.left = True
-            return Node(Pos(self.pos.x, self.pos.y - 1), pred=self, cost=self.cost + 1)
+        if self.len:
+            self.len -= 1
+            x, y = self.conns.pop()
+            return Node(x, y, maze, pred=self, cost=self.costN)
 
 
 def main():
@@ -98,10 +86,13 @@ def main():
             char = maze_read[line_i][char_i]
 
             if char == 'S':
-                start_pos = Pos(line_i, char_i)
+                start_pos = (line_i, char_i)
 
             if char != '\n':
                 maze_line.append(char)
+
+            if char == 'E':
+                maze_line.append(' ')
 
         maze.append(maze_line)
 
@@ -110,8 +101,9 @@ def main():
     if start_pos is None:
         raise Exception("Could not find start position")
 
-    next_node = Node(start_pos)
-    sortedList = [next_node, Node(Pos(-1, -1), cost=math.inf)]
+    next_node = Node(start_pos[0], start_pos[1], maze)
+    start_pos = next_node
+    sortedList = [next_node, Node(-1, -1, maze, cost=math.inf)]
 
     def printList():
         str_list = "["
@@ -138,13 +130,13 @@ def main():
         i = len(sortedList)//2
         leng = len(sortedList)
         for n in range(0, i):
-            if new_node < sortedList[i]:
-                if sortedList[i-1] <= new_node:
+            if new_node.cost < sortedList[i].cost:
+                if sortedList[i-1].cost <= new_node.cost:
                     break
                 else:
                     i = i // 2
             else:
-                if new_node <= sortedList[i+1]:
+                if new_node.cost <= sortedList[i+1].cost:
                     i += 1
                     break
                 else:
@@ -157,7 +149,7 @@ def main():
 
     start = time.time()
     draw = 0
-    while maze[next_node.pos.x][next_node.pos.y] != 'E':
+    while maze[next_node.x][next_node.y] != 'E':
         next_node = None
 
         i = 0
@@ -176,8 +168,8 @@ def main():
             insert_node(next_node)
 
         """
-        if maze[next_node.pos.x][next_node.pos.y] != 'E' and maze[next_node.pos.x][next_node.pos.y] != 'S':
-            maze[next_node.pos.x][next_node.pos.y] = Colors.BLUEBG + ' ' + Colors.ENDC
+        if maze[next_node.x][next_node.y] != 'E' and maze[next_node.x][next_node.y] != 'S':
+            maze[next_node.x][next_node.y] = Colors.BLUEBG + ' ' + Colors.ENDC
             draw += 1
             if draw % 100 == 0:
                 os.system("clear")
@@ -187,8 +179,8 @@ def main():
     end_time = time.time()
 
     #draw = 0
-    while next_node.pos != start_pos:
-        maze[next_node.pos.x][next_node.pos.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
+    while next_node != start_pos:
+        maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
         #draw += 1
         #if draw % 4 == 0:
