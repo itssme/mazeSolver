@@ -149,6 +149,7 @@ def main():
 
     start = time.time()
     draw = 0
+    unique_dic = {}
     while maze[next_node.x][next_node.y] != 'E':
         next_node = None
 
@@ -159,19 +160,21 @@ def main():
 
         #printList()
 
-        if next_node in sortedList:
-            old_i = sortedList.index(next_node)
-            if next_node.cost < sortedList[old_i].cost:
+        old_n = unique_dic.get((next_node.x, next_node.y))
+        if old_n:
+            if next_node.cost < old_n.cost:
                 sortedList.remove(next_node)
                 insert_node(next_node)
+                unique_dic[(next_node.x, next_node.y)] = next_node
         else:
             insert_node(next_node)
+            unique_dic[(next_node.x, next_node.y)] = next_node
 
         """
         if maze[next_node.x][next_node.y] != 'E' and maze[next_node.x][next_node.y] != 'S':
             maze[next_node.x][next_node.y] = Colors.BLUEBG + ' ' + Colors.ENDC
             draw += 1
-            if draw % 100 == 0:
+            if draw % 300 == 0:
                 os.system("clear")
                 printMaze()
         """
