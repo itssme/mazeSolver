@@ -28,7 +28,7 @@ class Node:
 
 
 def main():
-    reader = open("maze2.txt", "r")
+    reader = open("maze/maze2.txt", "r")
 
     maze_read = reader.readlines()
     maze = []

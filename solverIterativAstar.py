@@ -33,11 +33,11 @@ class Colors:
 
 
 class Node:
-    def __init__(self, x, y, maze, pred=None, cost=0):
+    def __init__(self, x, y, end_pos, maze, pred=None, cost=0):
         self.x = x
         self.y = y
         self.pred = pred
-        self.cost = cost
+        self.cost = cost + abs((x - end_pos[0]))*2 + abs((y - end_pos[1]))*2
         self.costN = cost + 1
 
         self.conns = []
@@ -54,8 +54,7 @@ class Node:
         self.len = len(self.conns)
 
     def __str__(self):
-        #return "Node(" + str(self) + ", cost=" + str(self.cost) + ")"
-        return str(self.cost)
+        return "Node((" + str(self.x) + "," + str(self.y) + "), cost=" + str(self.cost) + ")"
 
     def __eq__(self, o):
         return o.x == self.x and o.y == self.y
@@ -66,11 +65,17 @@ class Node:
     def __le__(self, other):
         return self.cost <= other.cost
 
-    def get_next(self, maze):
+    def get_next(self, maze, end_pos):
         if self.len:
             self.len -= 1
             x, y = self.conns.pop()
-            return Node(x, y, maze, pred=self, cost=self.costN)
+            return Node(x, y, end_pos, maze, pred=self, cost=self.costN)
+
+
+class fastList(list):
+
+    def remove(self, object) -> None:
+        super().remove(object)
 
 
 def main():
@@ -92,6 +97,7 @@ def main():
                 maze_line.append(char)
 
             if char == 'E':
+                end_pos = (line_i, char_i)
                 maze_line.append(' ')
 
         maze.append(maze_line)
@@ -101,9 +107,9 @@ def main():
     if start_pos is None:
         raise Exception("Could not find start position")
 
-    next_node = Node(start_pos[0], start_pos[1], maze)
+    next_node = Node(start_pos[0], start_pos[1], end_pos, maze)
     start_pos = next_node
-    sortedList = [next_node, Node(-1, -1, maze, cost=math.inf)]
+    sortedList = [next_node, Node(-1, -1, end_pos, maze, cost=math.inf)]
 
     def printList():
         str_list = "["
@@ -151,16 +157,18 @@ def main():
     unique_dic = {}
     while maze[next_node.x][next_node.y] != 'E':
         i = 0
-        next_node = sortedList[i].get_next(maze)
+        next_node = sortedList[i].get_next(maze, end_pos)
         while next_node is None:
             del sortedList[i]
-            next_node = sortedList[i].get_next(maze)
-            i += 1
+            next_node = sortedList[i].get_next(maze, end_pos)
 
         old_n = unique_dic.get((next_node.x, next_node.y))
         if old_n:
             if next_node.cost < old_n.cost:
-                sortedList.remove(next_node)
+                try:
+                    sortedList.remove(next_node)  # todo should not throw error :/
+                except:
+                    pass
                 insert_node(next_node)
                 unique_dic[(next_node.x, next_node.y)] = next_node
         else:
@@ -173,15 +181,14 @@ def main():
         maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
 
-    os.system("clear")
-    printMaze()
+    #os.system("clear")
+    #printMaze()
     print("solved maze in " + str(end_time - start) + " seconds")
     return end_time - start
 
 
 if __name__ == '__main__':
     sum = main()
-    #for i in range(1, 10):
-    #    sum += main()
+    for i in range(1, 100):
+        sum += main()
     print("avg: " + str(sum/10))
-

@@ -1,6 +1,17 @@
 import os
 import time
 import math
+import curses
+
+"""
+                       _     _           _                      _             
+  __ _ _ __ __ _ _ __ | |__ (_) ___ __ _| | __   _____ _ __ ___(_) ___  _ __  
+ / _` | '__/ _` | '_ \| '_ \| |/ __/ _` | | \ \ / / _ \ '__/ __| |/ _ \| '_ \ 
+| (_| | | | (_| | |_) | | | | | (_| (_| | |  \ V /  __/ |  \__ \ | (_) | | | |
+ \__, |_|  \__,_| .__/|_| |_|_|\___\__,_|_|   \_/ \___|_|  |___/_|\___/|_| |_|
+ |___/          |_|                                                           
+
+"""
 
 
 class Colors:
@@ -32,12 +43,17 @@ class Colors:
     WHITEBG2 = '\33[107m'
 
 
+WALL = Colors.REDBG + ' ' + Colors.ENDC
+START = Colors.WHITEBG + ' ' + Colors.ENDC
+END = Colors.WHITEBG + ' ' + Colors.ENDC
+
+
 class Node:
-    def __init__(self, x, y, maze, pred=None, cost=0):
+    def __init__(self, x, y, maze, end_pos, pred=None, cost=0):
         self.x = x
         self.y = y
         self.pred = pred
-        self.cost = cost
+        self.cost = cost + abs((x - end_pos[0]))*2 + abs((y - end_pos[1]))*2
         self.costN = cost + 1
 
         self.conns = []
@@ -53,10 +69,6 @@ class Node:
 
         self.len = len(self.conns)
 
-    def __str__(self):
-        #return "Node(" + str(self) + ", cost=" + str(self.cost) + ")"
-        return str(self.cost)
-
     def __eq__(self, o):
         return o.x == self.x and o.y == self.y
 
@@ -66,11 +78,21 @@ class Node:
     def __le__(self, other):
         return self.cost <= other.cost
 
-    def get_next(self, maze):
+    def get_next(self, maze, end_pos):
         if self.len:
             self.len -= 1
             x, y = self.conns.pop()
-            return Node(x, y, maze, pred=self, cost=self.costN)
+            return Node(x, y, maze, end_pos, pred=self, cost=self.costN)
+
+
+def setup():
+    stdscr = curses.initscr()
+    curses.start_color()
+    curses.noecho()
+    curses.cbreak()
+    stdscr.keypad(1)
+    curses.curs_set(0)
+    return stdscr
 
 
 def main():
@@ -79,6 +101,10 @@ def main():
     maze_read = reader.readlines()
     maze = []
     start_pos = None
+
+    stdscr = setup()
+    MAX_X, MAX_Y = stdscr.getmaxyx()
+    main_window = curses.newwin(MAX_X, MAX_Y, 0, 0)
 
     for line_i in range(0, len(maze_read)):
         maze_line = []
@@ -92,6 +118,7 @@ def main():
                 maze_line.append(char)
 
             if char == 'E':
+                end_pos = (line_i, char_i)
                 maze_line.append(' ')
 
         maze.append(maze_line)
@@ -101,9 +128,26 @@ def main():
     if start_pos is None:
         raise Exception("Could not find start position")
 
-    next_node = Node(start_pos[0], start_pos[1], maze)
+    next_node = Node(start_pos[0], start_pos[1], maze, end_pos)
     start_pos = next_node
-    sortedList = [next_node, Node(-1, -1, maze, cost=math.inf)]
+    sortedList = [next_node, Node(-1, -1, maze, end_pos, cost=math.inf)]
+
+    curses.init_pair(1, curses.COLOR_RED, curses.COLOR_RED)
+    curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_GREEN)
+    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_CYAN)
+    curses.init_pair(4, curses.COLOR_BLUE, curses.COLOR_BLUE)
+    curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_GREEN)
+
+    for i_line in range(0, len(maze)):
+        for i_char in range(0, len(maze[i_line])):
+            if maze[i_line][i_char] == '#':
+                main_window.addstr(i_line, i_char, ' ', curses.color_pair(1))
+            elif maze[i_line][i_char] == 'S':
+                main_window.addstr(i_line, i_char, ' ', curses.color_pair(2))
+            elif maze[i_line][i_char] == 'E':
+                main_window.addstr(i_line, i_char, ' ', curses.color_pair(2))
+
+    main_window.refresh()
 
     def printList():
         str_list = "["
@@ -117,11 +161,11 @@ def main():
             line_str = ""
             for char in line:
                 if char == '#':
-                    line_str += Colors.REDBG + ' ' + Colors.ENDC
+                    line_str += WALL
                 elif char == 'S':
-                    line_str += Colors.WHITEBG + ' ' + Colors.ENDC
+                    line_str += START
                 elif char == 'E':
-                    line_str += Colors.WHITEBG + ' ' + Colors.ENDC
+                    line_str += END
                 else:
                     line_str += char
             print(line_str)
@@ -150,11 +194,19 @@ def main():
     start = time.time()
     unique_dic = {}
     while maze[next_node.x][next_node.y] != 'E':
+        next_node = None
+
+        i = 1
+        while i < len(sortedList) - 1:
+            if not sortedList[i].len:
+                main_window.addstr(sortedList[i].x, sortedList[i].y, ' ', curses.color_pair(4))
+                del sortedList[i]
+            else:
+                i += 1
+
         i = 0
-        next_node = sortedList[i].get_next(maze)
         while next_node is None:
-            del sortedList[i]
-            next_node = sortedList[i].get_next(maze)
+            next_node = sortedList[i].get_next(maze, end_pos)
             i += 1
 
         old_n = unique_dic.get((next_node.x, next_node.y))
@@ -167,21 +219,26 @@ def main():
             insert_node(next_node)
             unique_dic[(next_node.x, next_node.y)] = next_node
 
+        #"""
+        if maze[next_node.x][next_node.y] != 'E' and maze[next_node.x][next_node.y] != 'S':
+            if next_node.len and not old_n:
+                main_window.addstr(next_node.x, next_node.y, ' ', curses.color_pair(3))
+            main_window.refresh()
+        #"""
+
+        #time.sleep(0.005)
     end_time = time.time()
 
     while next_node != start_pos:
-        maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
+        main_window.addstr(next_node.x, next_node.y, ' ', curses.color_pair(5))
+        main_window.refresh()
+        time.sleep(0.005)
 
-    os.system("clear")
-    printMaze()
+    time.sleep(2)
+    curses.endwin()
     print("solved maze in " + str(end_time - start) + " seconds")
-    return end_time - start
 
 
 if __name__ == '__main__':
-    sum = main()
-    #for i in range(1, 10):
-    #    sum += main()
-    print("avg: " + str(sum/10))
-
+    main()

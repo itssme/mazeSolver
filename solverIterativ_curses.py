@@ -96,7 +96,7 @@ def setup():
 
 
 def main():
-    reader = open("maze4.txt", "r")
+    reader = open("maze/maze3.txt", "r")
 
     maze_read = reader.readlines()
     maze = []
@@ -208,8 +208,6 @@ def main():
             next_node = sortedList[i].get_next(maze)
             i += 1
 
-        #printList()
-
         old_n = unique_dic.get((next_node.x, next_node.y))
         if old_n:
             if next_node.cost < old_n.cost:
@@ -227,6 +225,7 @@ def main():
             main_window.refresh()
         #"""
 
+        #time.sleep(0.001)
     end_time = time.time()
 
     while next_node != start_pos:
@@ -236,9 +235,7 @@ def main():
         time.sleep(0.005)
 
     time.sleep(2)
-
     curses.endwin()
-
     print("solved maze in " + str(end_time - start) + " seconds")
 
 
