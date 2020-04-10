@@ -37,8 +37,8 @@ class Node:
         self.x = x
         self.y = y
         self.pred = pred
-        self.cost = cost + abs((x - end_pos[0]))*2 + abs((y - end_pos[1]))*2
-        self.costN = cost + 1
+        self.cost = cost + 2 * math.sqrt(((x - end_pos[0]) * (x - end_pos[0])) + ((y - end_pos[1]) * (y - end_pos[1])))
+        self.costN = cost + 1.25
 
         self.conns = []
 
@@ -72,41 +72,7 @@ class Node:
             return Node(x, y, end_pos, maze, pred=self, cost=self.costN)
 
 
-class fastList(list):
-
-    def remove(self, object) -> None:
-        super().remove(object)
-
-
-def main():
-    reader = open("maze/maze3.txt", "r")
-
-    maze_read = reader.readlines()
-    maze = []
-    start_pos = None
-
-    for line_i in range(0, len(maze_read)):
-        maze_line = []
-        for char_i in range(0, len(maze_read[line_i])):
-            char = maze_read[line_i][char_i]
-
-            if char == 'S':
-                start_pos = (line_i, char_i)
-
-            if char != '\n':
-                maze_line.append(char)
-
-            if char == 'E':
-                end_pos = (line_i, char_i)
-                maze_line.append(' ')
-
-        maze.append(maze_line)
-
-    del maze_read
-
-    if start_pos is None:
-        raise Exception("Could not find start position")
-
+def main(maze, start_pos, end_pos, print_maze: bool):
     next_node = Node(start_pos[0], start_pos[1], end_pos, maze)
     start_pos = next_node
     sortedList = [next_node, Node(-1, -1, end_pos, maze, cost=math.inf)]
@@ -177,18 +143,14 @@ def main():
 
     end_time = time.time()
 
+    length = 0
     while next_node != start_pos:
         maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
+        length += 1
 
-    #os.system("clear")
-    #printMaze()
+    if print_maze:
+        os.system("clear")
+        printMaze()
     print("solved maze in " + str(end_time - start) + " seconds")
-    return end_time - start
-
-
-if __name__ == '__main__':
-    sum = main()
-    for i in range(1, 100):
-        sum += main()
-    print("avg: " + str(sum/10))
+    return end_time - start, length

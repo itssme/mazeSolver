@@ -53,8 +53,8 @@ class Node:
         self.x = x
         self.y = y
         self.pred = pred
-        self.cost = cost + abs((x - end_pos[0]))*2 + abs((y - end_pos[1]))*2
-        self.costN = cost + 1
+        self.cost = cost + 2*math.sqrt(((x - end_pos[0]) * (x - end_pos[0])) + ((y - end_pos[1]) * (y - end_pos[1])))
+        self.costN = cost + 1.25
 
         self.conns = []
 
@@ -95,38 +95,10 @@ def setup():
     return stdscr
 
 
-def main():
-    reader = open("maze/maze3.txt", "r")
-
-    maze_read = reader.readlines()
-    maze = []
-    start_pos = None
-
+def main(maze, start_pos, end_pos, loop_delay):
     stdscr = setup()
     MAX_X, MAX_Y = stdscr.getmaxyx()
     main_window = curses.newwin(MAX_X, MAX_Y, 0, 0)
-
-    for line_i in range(0, len(maze_read)):
-        maze_line = []
-        for char_i in range(0, len(maze_read[line_i])):
-            char = maze_read[line_i][char_i]
-
-            if char == 'S':
-                start_pos = (line_i, char_i)
-
-            if char != '\n':
-                maze_line.append(char)
-
-            if char == 'E':
-                end_pos = (line_i, char_i)
-                maze_line.append(' ')
-
-        maze.append(maze_line)
-
-    del maze_read
-
-    if start_pos is None:
-        raise Exception("Could not find start position")
 
     next_node = Node(start_pos[0], start_pos[1], maze, end_pos)
     start_pos = next_node
@@ -191,6 +163,8 @@ def main():
     #os.system("clear")
     #printMaze()
 
+    main_window.getch()
+
     start = time.time()
     unique_dic = {}
     while maze[next_node.x][next_node.y] != 'E':
@@ -212,33 +186,33 @@ def main():
         old_n = unique_dic.get((next_node.x, next_node.y))
         if old_n:
             if next_node.cost < old_n.cost:
-                sortedList.remove(next_node)
+                try:
+                    sortedList.remove(next_node)
+                except:
+                    pass
                 insert_node(next_node)
                 unique_dic[(next_node.x, next_node.y)] = next_node
         else:
             insert_node(next_node)
             unique_dic[(next_node.x, next_node.y)] = next_node
 
-        #"""
         if maze[next_node.x][next_node.y] != 'E' and maze[next_node.x][next_node.y] != 'S':
             if next_node.len and not old_n:
                 main_window.addstr(next_node.x, next_node.y, ' ', curses.color_pair(3))
             main_window.refresh()
-        #"""
 
-        #time.sleep(0.005)
+        time.sleep(loop_delay)
+
     end_time = time.time()
-
+    length = 0
     while next_node != start_pos:
+        length += 1
         next_node = next_node.pred
         main_window.addstr(next_node.x, next_node.y, ' ', curses.color_pair(5))
         main_window.refresh()
         time.sleep(0.005)
 
-    time.sleep(2)
+    #time.sleep(2)
+    main_window.getch()
     curses.endwin()
-    print("solved maze in " + str(end_time - start) + " seconds")
-
-
-if __name__ == '__main__':
-    main()
+    print("solved maze in " + str(end_time - start) + " seconds: " + str(length) + " length")
