@@ -121,7 +121,9 @@ def main(maze, start_pos, end_pos, print_maze: bool):
 
     start = time.time()
     unique_dic = {}
+    length = 0
     while maze[next_node.x][next_node.y] != 'E':
+        length += 1
         i = 0
         next_node = sortedList[i].get_next(maze, end_pos)
         while next_node is None:
@@ -143,14 +145,15 @@ def main(maze, start_pos, end_pos, print_maze: bool):
 
     end_time = time.time()
 
-    length = 0
+    #length = 0
     while next_node != start_pos:
-        maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
+        if print_maze:
+            maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
-        length += 1
+        #length += 1
 
     if print_maze:
         os.system("clear")
         printMaze()
-    print("solved maze in " + str(end_time - start) + " seconds")
+        print("solved maze in " + str(end_time - start) + " seconds: " + str(length) + " length")
     return end_time - start, length

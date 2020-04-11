@@ -144,12 +144,13 @@ def main(maze, start_pos, end_pos, print_maze: bool):
 
     length = 0
     while next_node != start_pos:
-        maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
+        if print_maze:
+            maze[next_node.x][next_node.y] = Colors.GREENBG2 + ' ' + Colors.ENDC
         next_node = next_node.pred
         length += 1
 
     if print_maze:
         os.system("clear")
         printMaze()
-    print("solved maze in " + str(end_time - start) + " seconds")
+    #print("solved maze in " + str(end_time - start) + " seconds")
     return end_time - start, length

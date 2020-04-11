@@ -66,4 +66,4 @@ if __name__ == '__main__':
     parser.add_argument("--delay", default=0, type=float)
     args = parser.parse_args()
 
-    main("maze/" + args.maze, args.algo.lower(), args.curses, args.delay)
+    main(args.maze, args.algo.lower(), args.curses, args.delay)
