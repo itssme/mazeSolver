@@ -33,10 +33,11 @@ def printMaze(maze):
         print(line_str)
 
 
-def get_next(maze: [[]], node: Node) -> Node:
-    pos_change = [(0, -1), (0, 1), (1, 0), (-1, 0)]
-    pos_choice = range(0, len(pos_change))
+pos_change = [(0, -1), (0, 1), (1, 0), (-1, 0)]
+pos_choice = range(0, len(pos_change))
 
+
+def get_next(maze: [[]], node: Node, height, width) -> Node:
     random.shuffle(pos_change)
     i = random.choice(pos_choice)
 
@@ -49,7 +50,7 @@ def get_next(maze: [[]], node: Node) -> Node:
 
         i -= 1
 
-        if x < 0 or y < 0 or x >= len(maze) or y >= len(maze[x]):
+        if x < 0 or y < 0 or x >= height or y >= width:
             continue
 
         if maze[x][y] is None:
@@ -60,8 +61,9 @@ def get_next(maze: [[]], node: Node) -> Node:
 
 
 def main():
-    width = 190
-    height = 5000
+    random.seed()
+    width = 25
+    height = 25
     pre_maze = [[None for n in range(0, width)] for nn in range(0, height)]
 
     start_node = Node(0, 0)
@@ -70,9 +72,12 @@ def main():
 
     maze = [['#' for n in range(0, width * 2 + 1)] for nn in range(0, height * 2 + 1)]
 
-    current_node = get_next(pre_maze, current_node)
+    calc_height = len(pre_maze)
+    calc_width = len(pre_maze[0])
+
+    current_node = get_next(pre_maze, current_node, calc_height, calc_width)
     while current_node != start_node:
-        next_node = get_next(pre_maze, current_node)
+        next_node = get_next(pre_maze, current_node, calc_height, calc_width)
 
         if next_node is None:
             maze[current_node.x * 2 + 1][current_node.y * 2 + 1] = ' '
