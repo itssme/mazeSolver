@@ -95,7 +95,7 @@ def setup():
     return stdscr
 
 
-def main(maze, start_pos, end_pos, loop_delay):
+def main(maze, start_pos, end_pos, loop_delay, loop_back_delay=0.005):
     stdscr = setup()
     MAX_X, MAX_Y = stdscr.getmaxyx()
     main_window = curses.newwin(MAX_X, MAX_Y, 0, 0)
@@ -207,7 +207,7 @@ def main(maze, start_pos, end_pos, loop_delay):
         next_node = next_node.pred
         main_window.addstr(next_node.x, next_node.y, ' ', curses.color_pair(5))
         main_window.refresh()
-        time.sleep(0.005)
+        time.sleep(loop_back_delay)
 
     #time.sleep(2)
     main_window.getch()
