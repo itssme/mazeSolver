@@ -11,8 +11,13 @@ import sys
 
 
 def main():
-    data = sys.stdin.read()
-    maze, start_pos, end_pos = parse_maze(data.split("\n"))
+    data = sys.stdin.read().split("\n")
+
+    if not data[-1]:
+        data = data[:-1]
+
+    maze, start_pos, end_pos = parse_maze(data)
+
     dijkstra(maze, start_pos, end_pos, True)
 
 
