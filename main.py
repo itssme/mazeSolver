@@ -7,18 +7,15 @@ from solver.fastImpl import solverIterativAstar
 import argparse
 
 
-def parse_maze(file):
-    reader = open(file, "r")
-
-    maze_read = reader.readlines()
+def parse_maze(maze_str: [str]):
     maze = []
     start_pos = None
     end_pos = None
 
-    for line_i in range(0, len(maze_read)):
+    for line_i in range(0, len(maze_str)):
         maze_line = []
-        for char_i in range(0, len(maze_read[line_i])):
-            char = maze_read[line_i][char_i]
+        for char_i in range(0, len(maze_str[line_i])):
+            char = maze_str[line_i][char_i]
 
             if char == 'S':
                 start_pos = (line_i, char_i)
@@ -41,8 +38,14 @@ def parse_maze(file):
     return maze, start_pos, end_pos
 
 
-def main(file: str, algo: str, use_curses: bool, loop_delay: float):
-    maze, start_pos, end_pos = parse_maze(file)
+def parse_maze_file(file: str):
+    reader = open(file, "r")
+    maze_read = reader.readlines()
+
+    return parse_maze(maze_read)
+
+
+def main(maze: [[]], algo: str, use_curses: bool, loop_delay: float):
 
     if algo == "astar":
         if use_curses:
@@ -66,4 +69,6 @@ if __name__ == '__main__':
     parser.add_argument("--delay", default=0, type=float)
     args = parser.parse_args()
 
-    main(args.maze, args.algo.lower(), args.curses, args.delay)
+    maze, start_pos, end_pos = parse_maze_file(args.maze)
+
+    main(maze, args.algo.lower(), args.curses, args.delay)

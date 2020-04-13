@@ -3,12 +3,11 @@ from solver.fastImpl import solverIterativAstar
 
 from solver.fastImpl.solverIterativ import Colors
 
-from multiprocessing import Process, Queue, Pipe, Pool
+from multiprocessing import Queue, Pipe, Pool
 
 from main import parse_maze
 
 import random
-import signal
 import math
 import time
 import os

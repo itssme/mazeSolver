@@ -62,8 +62,8 @@ def get_next(maze: [[]], node: Node, height, width) -> Node:
 
 def main():
     random.seed()
-    width = 25
-    height = 25
+    width = 10
+    height = 10
     pre_maze = [[None for n in range(0, width)] for nn in range(0, height)]
 
     start_node = Node(0, 0)
@@ -97,10 +97,8 @@ def main():
 
     maze[1][1] = 'S'
     maze[-2][-2] = 'E'
-    #printMaze(maze)
 
-    #cursesDijkstra(maze, (1, 1), (-2, -2), 0, 0)
-    print(dijkstra(maze, (1, 1), (-2, -2), True))
+    return maze, (1, 1), (-2, -2)
 
 
 if __name__ == '__main__':
