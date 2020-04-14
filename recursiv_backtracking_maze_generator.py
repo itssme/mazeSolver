@@ -60,10 +60,11 @@ def get_next(maze: [[]], node: Node, height, width) -> Node:
             return new_node
 
 
-def main():
-    random.seed()
-    width = 10
-    height = 10
+def main(height=10, width=10, seed=None):
+    height //= 2
+    width //= 2
+
+    random.seed(seed)
     pre_maze = [[None for n in range(0, width)] for nn in range(0, height)]
 
     start_node = Node(0, 0)

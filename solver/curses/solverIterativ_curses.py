@@ -104,6 +104,7 @@ def main(maze, start_pos, end_pos, loop_delay, loop_back_delay=0.005):
     start_pos = next_node
     sortedList = [next_node, Node(-1, -1, maze, cost=math.inf)]
 
+    # TODO: move to setup and define a setup for all curses programmes
     curses.init_pair(1, curses.COLOR_RED, curses.COLOR_RED)
     curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_GREEN)
     curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_CYAN)
