@@ -117,9 +117,6 @@ def main(maze, start_pos, end_pos, print_maze: bool):
 
         sortedList.insert(i, new_node)
 
-    #os.system("clear")
-    #printMaze()
-
     start = time.time()
     unique_dic = {}
     while maze[next_node.x][next_node.y] != 'E':

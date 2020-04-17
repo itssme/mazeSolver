@@ -25,7 +25,7 @@ def parse_maze(maze_str: [str]):
 
             if char == 'E':
                 end_pos = (line_i, char_i)
-                maze_line.append(' ')
+                # maze_line.append(' ')
 
         maze.append(maze_line)
 
@@ -45,16 +45,15 @@ def parse_maze_file(file: str):
     return parse_maze(maze_read)
 
 
-def main(maze: [[]], algo: str, use_curses: bool, loop_delay: float):
-
+def main(maze: [[]], algo: str, use_curses: bool, loop_delay: float, loop_delay_final: float = 0):
     if algo == "astar":
         if use_curses:
-            solverIterativAstar_curses.main(maze, start_pos, end_pos, loop_delay)
+            solverIterativAstar_curses.main(maze, start_pos, end_pos, loop_delay, loop_delay_final)
         else:
             solverIterativAstar.main(maze, start_pos, end_pos, print_maze=True)
     elif algo == "dijkstra":
         if use_curses:
-            solverIterativ_curses.main(maze, start_pos, end_pos, loop_delay)
+            solverIterativ_curses.main(maze, start_pos, end_pos, loop_delay, loop_delay_final)
         else:
             solverIterativ.main(maze, start_pos, end_pos, print_maze=True)
     else:
@@ -67,8 +66,9 @@ if __name__ == '__main__':
     parser.add_argument("--maze", default="maze0.txt", type=str)
     parser.add_argument("--curses", action="store_true")
     parser.add_argument("--delay", default=0, type=float)
+    parser.add_argument("--delay_final", default=0, type=float)
     args = parser.parse_args()
 
     maze, start_pos, end_pos = parse_maze_file(args.maze)
 
-    main(maze, args.algo.lower(), args.curses, args.delay)
+    main(maze, args.algo.lower(), args.curses, args.delay, args.delay_final)

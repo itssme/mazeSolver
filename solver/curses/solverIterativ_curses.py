@@ -165,6 +165,7 @@ def main(maze, start_pos, end_pos, loop_delay, loop_back_delay=0.005):
     #printMaze()
 
     main_window.getch()
+    time.sleep(1)
 
     start = time.time()
     unique_dic = {}
@@ -210,7 +211,7 @@ def main(maze, start_pos, end_pos, loop_delay, loop_back_delay=0.005):
         main_window.refresh()
         time.sleep(loop_back_delay)
 
-    #time.sleep(2)
     main_window.getch()
+    time.sleep(2)
     curses.endwin()
     print("solved maze in " + str(end_time - start) + " seconds: " + str(length) + " length")

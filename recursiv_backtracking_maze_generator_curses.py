@@ -63,7 +63,7 @@ def get_next(maze: [[]], node: Node, height, width) -> Node:
             return new_node
 
 
-def main(height=20, width=50, seed=None):
+def main(height=20, width=50, seed=None, delay=0):
     stdscr = setup()
     MAX_X, MAX_Y = stdscr.getmaxyx()
     main_window = curses.newwin(MAX_X, MAX_Y, 0, 0)
@@ -86,6 +86,10 @@ def main(height=20, width=50, seed=None):
 
     calc_height = len(pre_maze)
     calc_width = len(pre_maze[0])
+
+    main_window.refresh()
+    main_window.getch()
+    time.sleep(1)
 
     current_node = get_next(pre_maze, current_node, calc_height, calc_width)
     last_pos = (current_node.x, current_node.y)
@@ -121,7 +125,7 @@ def main(height=20, width=50, seed=None):
         main_window.addstr(last_pos[0] * 2 + 1, last_pos[1] * 2 + 1, ' ', curses.color_pair(2))
 
         main_window.refresh()
-        time.sleep(0.005)
+        time.sleep(delay)
 
     maze[1][1] = 'S'
     maze[-2][-2] = 'E'
@@ -131,6 +135,7 @@ def main(height=20, width=50, seed=None):
 
     main_window.refresh()
     main_window.getch()
+    time.sleep(2)
     curses.endwin()
 
     return maze, (1, 1), (-2, -2)
