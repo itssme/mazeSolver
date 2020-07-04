@@ -1,11 +1,18 @@
 import argparse
+import time
 
 from recursiv_backtracking_maze_generator import main as recursive_back
 from recursiv_backtracking_maze_generator_curses import main as recursive_back_curses
 
+# example:
+# python3 generator.py --height 25 --width 100 --raw | python3 solve.py --curses --delay 0.005 --delay_final 0.005
+
 
 def main(write: str, raw: bool, curses: bool, height: int, width: int, delay: float):
+
+    start = time.time()
     maze, start_pos, end_pos = recursive_back(height, width)
+    print("took " + str(time.time() - start))
 
     maze_str = ""
 

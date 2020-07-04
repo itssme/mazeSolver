@@ -213,5 +213,6 @@ def main(maze, start_pos, end_pos, loop_delay, loop_back_delay=0.005):
         time.sleep(loop_back_delay)
 
     main_window.getch()
+    time.sleep(1)
     curses.endwin()
     print("solved maze in " + str(end_time - start) + " seconds: " + str(length) + " length")

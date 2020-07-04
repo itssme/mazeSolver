@@ -16,6 +16,9 @@ from solver.fastImpl import solverIterativAstar
 import sys
 import argparse
 
+# example:
+# python3 generator.py --height 25 --width 100 --raw | python3 solve.py --curses --delay 0.005 --delay_final 0.005
+
 
 def main(algo, use_curses, loop_delay, loop_delay_final):
     data = sys.stdin.read().split("\n")
