@@ -106,7 +106,7 @@ def printMaze(maze):
 
 
 def main():
-    maze, start_pos, end_pos = parse_maze("generated/saved_172.txt")
+    maze, start_pos, end_pos = parse_maze(open("generated/saved_172.txt").read().split("\n"))
     fitness = get_fitness(maze, start_pos, end_pos)
 
     stop_queue = Queue()

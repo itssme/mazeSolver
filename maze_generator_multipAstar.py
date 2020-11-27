@@ -65,8 +65,8 @@ base_v = 5
 
 
 def mutate(new_maze, mutations, start_pos, end_pos, best_fit):
-    base_x = random.randrange(1 + base_v, 20 - base_v)
-    base_y = random.randrange(1 + base_v, 20 - base_v)
+    base_x = random.randrange(1 + base_v, 51 - base_v)
+    base_y = random.randrange(1 + base_v, 100 - base_v)
     fitness = -math.inf
 
     for i in range(0, mutations*10):
@@ -120,13 +120,15 @@ def printMaze(maze):
 
 def main():
     #path = "generated/"
-    path = "generated/Astar_20x20/"
+    #path = "generated/Astar_20x20/"
     #save_as = "generated/savedAstar_"
-    save_as = "generated/Astar_20x20/savedAstarBIG_"
+    #save_as = "generated/Astar_20x20/savedAstarBIG_"
+    path = "generated/Astar_test/"
+    save_as = "generated/Astar_test/savedAstarBIG_"
 
     filename = os.listdir(path)[-1]
     #filename = "init2.txt"
-    maze, start_pos, end_pos = parse_maze(path + filename)
+    maze, start_pos, end_pos = parse_maze(open(path + filename).read().split("\n"))
     fitness = get_fitness(maze, start_pos, end_pos)
 
     stop_queue = Queue()
