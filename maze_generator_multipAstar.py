@@ -66,7 +66,7 @@ base_v = 5
 
 def mutate(new_maze, mutations, start_pos, end_pos, best_fit):
     base_x = random.randrange(1 + base_v, 51 - base_v)
-    base_y = random.randrange(1 + base_v, 100 - base_v)
+    base_y = random.randrange(1 + base_v, 200 - base_v)
     fitness = -math.inf
 
     for i in range(0, mutations*10):
