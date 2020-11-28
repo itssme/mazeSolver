@@ -25,7 +25,11 @@ def get_fitness(maze, start_pos, end_pos):
         return -math.inf
 
 
-def generator(start_maze, start_pos, end_pos, run: Queue, p: Pipe):
+def generator(start_maze, start_pos, end_pos, run: Queue, result: Queue):
+    if not run.empty():
+        print("why am I running >:(")
+        time.sleep(1)
+        return None
     maze = [x[:] for x in start_maze]
     max_mutations = 1
     max_loops = 2500
@@ -39,8 +43,9 @@ def generator(start_maze, start_pos, end_pos, run: Queue, p: Pipe):
             new_maze, new_fitness = mutate([x[:] for x in maze], mutations, start_pos, end_pos, fitness)
 
             if fitness < new_fitness:
-                print("FOUND BETTER: " + str(new_fitness))
-                p.send(new_maze)
+                if run.empty():
+                    print("FOUND BETTER: " + str(new_fitness))
+                    result.put(new_maze)
                 return None
             elif fitness == new_fitness:
                 maze = new_maze
@@ -124,33 +129,44 @@ def main():
     #save_as = "generated/savedAstar_"
     #save_as = "generated/Astar_20x20/savedAstarBIG_"
     path = "generated/Astar_test/"
-    save_as = "generated/Astar_test/savedAstarBIG_"
+    save_as = "generated/Astar_test/"
 
-    filename = os.listdir(path)[-1]
-    #filename = "init2.txt"
+
+    filename = os.listdir(path)
+    filename = [int(elem.split(".")[0]) for elem in filename if not "init" in elem]
+    filename.sort()
+    filename = str(filename[-1]) + ".txt" if filename else os.listdir(path)[0]
+
+    #filename = os.listdir(path)[-1]
     maze, start_pos, end_pos = parse_maze(open(path + filename).read().split("\n"))
     fitness = get_fitness(maze, start_pos, end_pos)
 
     stop_queue = Queue()
-    parent_conn, child_conn = Pipe()
+    #parent_conn, child_conn = Pipe()
+    result = Queue(0)
 
-    worker_pool = Pool(4, generator, (maze, start_pos, end_pos, stop_queue, child_conn))
+    worker_pool = Pool(4, generator, (maze, start_pos, end_pos, stop_queue, result))
 
     last_save = fitness
 
     try:
         while True:
-            new_maze = parent_conn.recv()
+            print("waiting for next maze")
+            new_maze = result.get()
             print("got new maze")
-            new_fitness = get_fitness(new_maze, start_pos, end_pos)
+            new_fitness = get_fitness([x[:] for x in new_maze], start_pos, end_pos)
+            print("solved new maze with fitness " + str(new_fitness) + " current fitness is " + str(fitness))
             if fitness < new_fitness:
+                print("using new maze")
                 maze = new_maze
                 stop_queue.put(True)
                 worker_pool.close()
+                print("waiting for join")
                 worker_pool.join()
+                print("getting stop")
                 stop_queue.get()
                 fitness = new_fitness
-                worker_pool = Pool(4, generator, (maze, start_pos, end_pos, stop_queue, child_conn))
+                worker_pool = Pool(4, generator, (maze, start_pos, end_pos, stop_queue, result))
                 print("started new threads")
                 time, _ = solverIterativAstar.main([x[:] for x in maze], start_pos, end_pos, True)
                 print("Fitness is: " + str(fitness))
